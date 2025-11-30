@@ -1,0 +1,88 @@
+body {
+    color: #999;
+
+}
+
+
+.background-cell {
+    background: linear-gradient( #bbb, transparent 1px), linear-gradient( 90deg, #bbb, transparent 1px);
+    background-size: 15px 15px;
+    background-position: center center;
+    text-align: center;
+}
+
+.form-container {
+    display: flex;
+    margin: 10% auto;
+    background-color: white;
+    flex-direction: column; /* Располагает элементы друг под другом */
+    align-items: center;   
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 70%;
+}
+
+.img-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10% auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    position: relative; 
+}
+
+div {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px 20px;
+    justify-content: space-between;
+    margin-top: 3%;
+}
+
+
+label {
+    margin-right: 10px;
+}
+
+
+input[type="button"] {
+    border-radius: 10px;
+    padding: 3px 30px;
+    margin-bottom: 3%;
+    margin-top: 3%;
+}
+
+.container {
+    display: inline-block;
+    width: 30%;
+    position: relative;
+}
+
+
+.picture {
+    width: 200px;
+    height: auto;
+}
+
+.delete-button {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.7); /* Прозрачный фон */
+    border: 2px solid black;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 2px 2px;
+    border-radius: 50%;
+  }
+
+  .no-error {
+    visibility: hidden;
+  }
+
+  .error {
+    color: red;
+  }
