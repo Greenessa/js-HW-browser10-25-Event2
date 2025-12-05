@@ -44,67 +44,99 @@ export default class workWithImg {
         this.flagEl.classList.remove('error');
         this.flagEl.classList.add('no-error');
         event.preventDefault();
-        if (this.inputElSrc.value != '') {
-            if (this.inputElName.value != '') {
-                let containerArray = [];
-                containerArray.push(this.inputElName.value);
-                containerArray.push(this.inputElSrc.value);
-                console.log('Текущее изображение', containerArray);
-                this.saveAppState.imgArray.push(containerArray);
-                console.log('Массив текущий', this.saveAppState.imgArray);
-                this.addImg(this.saveAppState.imgArray);
-                this.saveInStorage.setInStorage(this.saveAppState);  
-            } else {
-                this.saveAppState.imgArray.push(['No name', this.inputElSrc.value]);
-                this.addImg(this.saveAppState.imgArray);
-                // console.log('Массив текущий', this.saveAppState.imgArray);
-                this.saveInStorage.setInStorage(this.saveAppState);  
-            }
-        this.inputElSrc.value = null;
-        this.inputElName.value = null;
-        } else {
+        if (this.inputElSrc.value.trim() === '') {
             this.inputElSrc.setAttribute('placeholder', 'Ошибка! Вы ничего не ввели!');
+            return;
         }
+        // Проверяем, что URL начинается с http/https или является относительным путем
+        const urlPattern = /^(https?:\/\/|\/|\.\/|\.\.\/)/;
+        if (!urlPattern.test(this.inputElSrc.value.trim())) {
+            this.flagEl.textContent = 'Неверный формат ссылки на изображение';
+            this.flagEl.classList.remove('no-error');
+            this.flagEl.classList.add('error');
+            return;
+        }
+        const name = this.inputElName.value.trim() || 'No name';
+        const src = this.inputElSrc.value.trim();
+        // Проверяем, нет ли уже такого изображения в массиве
+        const isDuplicate = this.saveAppState.imgArray.some(img => img[1] === src);
+        if (isDuplicate) {
+            this.flagEl.textContent = 'Такое изображение уже добавлено';
+            this.flagEl.classList.remove('no-error');
+            this.flagEl.classList.add('error');
+            return;
+        }
+
+        this.saveAppState.imgArray.push([name, src]);
+        console.log('Массив текущий', this.saveAppState.imgArray);
+        // Создаем временное изображение для проверки URL
+        const testImg = new Image();
+        testImg.onload = () => {
+            this.addImg(this.saveAppState.imgArray);
+            this.saveInStorage.setInStorage(this.saveAppState);
+            this.inputElSrc.value = '';
+            this.inputElName.value = '';
+        };
+        testImg.onerror = () => {
+            // Удаляем добавленное изображение из массива, если оно не загрузилось
+            this.saveAppState.imgArray.pop();
+            this.flagEl.textContent = 'Не удалось загрузить изображение по указанной ссылке';
+            this.flagEl.classList.remove('no-error');
+            this.flagEl.classList.add('error');
+        };
+        testImg.src = src;
     }
 
     addImg (array) {
+        // Сначала очищаем контейнер
         let imgEls = this.imgContainerEl.querySelectorAll('.container');
         if (imgEls) {
             for (const imgEl of imgEls) {
                 imgEl.remove();
             }
         }
+        // Создаем и добавляем изображения
         for (const img of array) {
             let imgNewEl = document.createElement('div');
             imgNewEl.classList.add('container');
-            let nameEl=document.createElement('h3');
+
+            let nameEl = document.createElement('h3');
             nameEl.classList.add('name');
             nameEl.textContent = img[0];
-            console.log(img[0], img[1]);
+
             let srsEl = document.createElement('img');
             srsEl.classList.add('picture');
-            srsEl.src = img[1];
-            srsEl.setAttribute('alt', '');
+            srsEl.setAttribute('alt', img[0]);
+
             let butEl = document.createElement('button');
             butEl.classList.add('delete-button');
             butEl.innerHTML = '&times;';
+
+           
+            // Добавляем элементы в контейнер, но пока не добавляем в DOM
             imgNewEl.append(nameEl, butEl, srsEl);
+
+            // Обработчик успешной загрузки
             srsEl.onload = () => {
-                // imgNewEl.append(srsEl);
-                if (this.width + this.height == 0) {
-                    this.onerror();
+                // Проверяем размеры изображения
+                if (srsEl.naturalWidth === 0 || srsEl.naturalHeight === 0) {
+                    srsEl.onerror();
                     return;
                 }
-            }
+                // Если всё в порядке, добавляем контейнер в DOM
+                this.imgContainerEl.append(imgNewEl);
+            };
+            
+             // Обработчик ошибки загрузки
             srsEl.onerror = () => {
-                console.error('Ошибка загрузки изображения');
+                console.error('Ошибка загрузки изображения:', img[1]);
                 this.flagEl.classList.remove('no-error');
                 this.flagEl.classList.add('error');
-            }
-
-            // const blob = new Blob([img[1]], { type: 'text/plain' });
-            // let url = URL.createObjectURL(blob);
-            this.imgContainerEl.append(imgNewEl);
+                // Не добавляем контейнер в DOM, если изображение не загрузилось
+            };
+             // Устанавливаем источник изображения после добавления обработчиков
+            srsEl.src = img[1];
+            
         }
         
     }
