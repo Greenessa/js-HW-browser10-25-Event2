@@ -10,7 +10,7 @@ export default class saveInStorage {
   getFromStorage() {
     try {
       return JSON.parse(this.storage.getItem("stateimg"));
-    } catch (error) {
+    } catch {
       throw new Error("Invalid state");
     }
   }
