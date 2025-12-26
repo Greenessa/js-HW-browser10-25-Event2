@@ -24,7 +24,7 @@ export default class workWithImg {
     console.log(obj);
     this.saveAppState = SaveAppState.from(obj);
     console.log("Загруженные изображения", this.saveAppState.imgArray);
-    if (this.saveAppState != null) {
+    if (this.saveAppState.imgArray) {
       this.addImg(this.saveAppState.imgArray);
     }
     this.flagEl.classList.remove("error");
